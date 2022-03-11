@@ -1,6 +1,7 @@
 <template>
   <v-container>
-    <h1>Compra NFT</h1><br>
+    <h1>Compra NFT</h1>
+    <br />
     <!--
     <v-col>
         <v-card>
@@ -22,67 +23,68 @@
         </v-card>
     </v-card> -->
     <v-expansion-panels>
-        <v-expansion-panel
-            v-for="(breeder, index) in this.$store.state.datiAllevatori"
-            :key="index"
-        >
-            <v-expansion-panel-header>
-                
-                {{ breeder.nome }}
-                
-            </v-expansion-panel-header>
+      <v-expansion-panel
+        v-for="(breeder, index) in this.$store.state.datiAllevatori"
+        :key="index"
+      >
+        <v-expansion-panel-header>
+          {{ breeder.nome }}
+        </v-expansion-panel-header>
 
-            <v-expansion-panel-content>
-                <v-container >
-                
-                    <v-card
-                        v-for="(mucca, ind) in $store.state.datiAllevatori[index].nft" 
-                        :key="ind"
-                        width="300"
-                        hover
-                        class="ma-4"
-                    >
-                        <v-card-title>
-                            {{ mucca }}
-                        </v-card-title>
-                        <v-card-actions>
-                            <v-btn>
-                                Compra!
-                            </v-btn>
-                        </v-card-actions>
-                    </v-card>
+        <v-expansion-panel-content>
+          <v-container>
+            <v-card
+              v-for="(mucca, ind) in $store.state.datiAllevatori[index].nft"
+              :key="ind"
+              width="500"
+              hover
+              class="ma-4"
+            >
+              <v-img
+                src="https://gateway.pinata.cloud/ipfs/QmTuhgzis4Ge8ZymQDkYhSvK5CwyeYSw851vUc5xn7QEPo"
+              />
+              <v-card-title>
+                {{ mucca["marca auricolare"] }} <br />
+              </v-card-title>
 
-                </v-container>
-                
-            </v-expansion-panel-content>
+              <v-card-text>
+                colore: {{ mucca["colore"] }} <br />
+                eta': {{ mucca["eta"] }} <br />
+                razza: {{ mucca["razza"] }}
+              </v-card-text>
 
-        </v-expansion-panel>
+              <v-card-actions>
+                <v-btn> Compra! </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-container>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
     </v-expansion-panels>
   </v-container>
 </template>
-
 
 <script>
 import { mapActions } from "vuex";
 
 export default {
-    name: "CowList",
-    data: function() {
-        return {
-            cows: []
-        }
+  name: "CowList",
+  data: function () {
+    return {
+      cows: [],
+    };
+  },
+
+  mounted() {
+    this.getMucche();
+  },
+
+  methods: {
+    ...mapActions(["getMucche"]),
+
+    buy() {
+      console.log("ciao");
     },
-
-    mounted(){
-        this.getMucche()
-    },
-
-    methods: {
-        ...mapActions(["getMucche"]),
-
-        buy(){
-            console.log("ciao")
-        }
-    }
-}
+  },
+};
 </script>
