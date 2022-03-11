@@ -21,7 +21,7 @@
                 <v-btn type="button" class="btn btn-primary mx-2" v-on:click="mint(cow.id)"> Mint </v-btn> 
             </v-card-actions>
         </v-card>
-        <!--
+        
         <br/>
         <br/>
         <br/>
@@ -31,16 +31,16 @@
             <h3> Elenco mucche dell'allevatore: </h3>
             <div>
                 <div v-if="!this.$store.state.cowList"></div>
-                <div v-for="(cow, index) in this.$store.state.cowsList" :key="index">
-                    <p> id mucca: {{cow}} </p> <br/>
+                <v-card v-for="(cow, index) in this.$store.state.cowsList" :key="index">
+                    <v-card-title> id mucca: {{cow}} </v-card-title> 
                     
                     <br/>
                 
-                </div>
+                </v-card>
                 
 
             </div>
-        </v-card>-->
+        </v-card>
     </v-container>
 </template>
 
@@ -67,12 +67,15 @@ export default {
     },
     
     methods: {
-        ...mapActions(["initWeb3", "getAllevatoreByAddress", "mintTx"]),
+        ...mapActions(["initWeb3", "initWeb3Pub", "getAllevatoreByAddress", "mintTx"]),
 
         doLogin(){
 
-            if (this.$store.state.web3 === null)
+            if (this.$store.state.web3 === null){
                 this.initWeb3(this.pk)
+                this.initWeb3Pub()
+            }
+                
 
             this.getAllevatoreByAddress(this.pk)
         },
@@ -80,16 +83,38 @@ export default {
         async mint(id){
 
             if (this.$store.state.cowsList.indexOf(id) !== -1) {
+                // controllo che non ci sia gia un payload con quel nome
+                const metadataFilter = {
+                    name: id,
+                    keyvalues: {
+                        
+                    }
+                };
 
-                let ipfshash = await this.uploadMetadata() 
+                const filters = {
+                    status : 'pinned',
+                    pageLimit: 10,
+                    pageOffset: 0,
+                    metadata: metadataFilter
+                };
 
-                let payload = {
-                    from: "0x0423cFBFdA5CDdab4F6777B6F1EEd92830F1e685",
-                    img: "QmTuhgzis4Ge8ZymQDkYhSvK5CwyeYSw851vUc5xn7QEPo",
-                    metadata: ipfshash.IpfsHash
+                let res = await pinata.pinList(filters)
+                console.log("res: ", res.rows)
+                
+                if (res.count == 0) {
+                
+                    let ipfshash = await this.uploadMetadata() 
+
+                    let payload = {
+                        from: this.$store.state.user.address,
+                        //img: "QmTuhgzis4Ge8ZymQDkYhSvK5CwyeYSw851vUc5xn7QEPo",
+                        metadata: ipfshash.IpfsHash
+                    }
+
+                    this.mintTx(payload)
+                } else {
+                    console.log("La marca auricolare indicata, risulta già essere stata mintata")
                 }
-
-                this.mintTx(payload)
                 
             } else
                 console.log("L'id inserito non appartiene all'allevatore")
@@ -135,7 +160,10 @@ export default {
 
             const options = {
                 pinataMetadata: {
-                    name: marca
+                    name: marca,
+                    keyvalues: {
+                        breeder: this.$store.state.user.CF
+                    } 
                 }
             }
 

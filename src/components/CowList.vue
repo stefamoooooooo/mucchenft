@@ -1,14 +1,18 @@
 <template>
-  <div>
-    <h1>Cow list</h1>
-    <v-card>
-        FILTRI
-    </v-card>
+  <v-container>
+    <h1>Compra NFT</h1><br>
+    <!--
+    <v-col>
+        <v-card>
+            <v-card-title></v-card-title>
+        </v-card>
+    </v-col>
+    
     <br/>
     <br/>
     <br/>
     <v-card elevation="2">
-        <v-card v-for="cow in cows" :key="cow.id" color="green">
+        <v-card v-for="cow in cows" :key="cow.id">
             id mucca: {{cow.id}} <br/>
             colore mucca: {{cow.color}} <br/>
             età: {{cow.age}} <br/>
@@ -16,12 +20,51 @@
             <button type="button" class="btn btn-primary mx-2"> Compra {{cow.price}} </button>
             <br/><br/>
         </v-card>
-    </v-card>
-  </div>
+    </v-card> -->
+    <v-expansion-panels>
+        <v-expansion-panel
+            v-for="(breeder, index) in this.$store.state.datiAllevatori"
+            :key="index"
+        >
+            <v-expansion-panel-header>
+                
+                {{ breeder.nome }}
+                
+            </v-expansion-panel-header>
+
+            <v-expansion-panel-content>
+                <v-container >
+                
+                    <v-card
+                        v-for="(mucca, ind) in $store.state.datiAllevatori[index].nft" 
+                        :key="ind"
+                        width="300"
+                        hover
+                        class="ma-4"
+                    >
+                        <v-card-title>
+                            {{ mucca }}
+                        </v-card-title>
+                        <v-card-actions>
+                            <v-btn>
+                                Compra!
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+
+                </v-container>
+                
+            </v-expansion-panel-content>
+
+        </v-expansion-panel>
+    </v-expansion-panels>
+  </v-container>
 </template>
 
 
 <script>
+import { mapActions } from "vuex";
+
 export default {
     name: "CowList",
     data: function() {
@@ -29,33 +72,14 @@ export default {
             cows: []
         }
     },
-    mounted() {
-        //getCows()
-        this.cows = [
-            {
-                id: 1,
-                color: "black",
-                age: 10,
-                price: 100,
-                breeder: "Gianni"
-            },
-            {
-                id: 2,
-                color: "white",
-                age: 7,
-                price: 200,
-                breeder: "Gianni"
-            },
-            {
-                id: 3,
-                color: "brown",
-                age: 5,
-                price: 300,
-                breeder: "Gianni"
-            }
-        ]
+
+    mounted(){
+        this.getMucche()
     },
+
     methods: {
+        ...mapActions(["getMucche"]),
+
         buy(){
             console.log("ciao")
         }
