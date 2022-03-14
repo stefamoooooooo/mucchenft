@@ -1,27 +1,12 @@
 <template>
   <v-container>
+    <vue-metamask
+      userMessage="msg"
+      @onComplete="onComplete" 
+    ></vue-metamask>
     <h1>Compra NFT</h1>
     <br />
-    <!--
-    <v-col>
-        <v-card>
-            <v-card-title></v-card-title>
-        </v-card>
-    </v-col>
-    
-    <br/>
-    <br/>
-    <br/>
-    <v-card elevation="2">
-        <v-card v-for="cow in cows" :key="cow.id">
-            id mucca: {{cow.id}} <br/>
-            colore mucca: {{cow.color}} <br/>
-            età: {{cow.age}} <br/>
-            allevatore: {{cow.breeder}} <br/>
-            <button type="button" class="btn btn-primary mx-2"> Compra {{cow.price}} </button>
-            <br/><br/>
-        </v-card>
-    </v-card> -->
+  
     <v-expansion-panels>
       <v-expansion-panel
         v-for="(breeder, index) in this.$store.state.datiAllevatori"
@@ -66,21 +51,31 @@
 
 <script>
 import { mapActions } from "vuex";
+import VueMetamask from 'vue-metamask';
+
 
 export default {
+  components: { VueMetamask },
   name: "CowList",
   data: function () {
     return {
       cows: [],
+      msg: "This is demo net work"
     };
   },
 
   mounted() {
+
     this.getMucche();
   },
 
   methods: {
     ...mapActions(["getMucche"]),
+
+    onComplete(data){
+        console.log('data:', data);
+        this.initWeb3Pub()
+    },
 
     buy() {
       console.log("ciao");
