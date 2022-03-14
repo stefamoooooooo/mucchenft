@@ -90,12 +90,14 @@ export default new Vuex.Store({
       commit("saveToken", token);
     },
 
-    initWeb3Pub({ commit }) {
-      const blockchainURL = "https://co3-pantheon.di.unito.it:7545";
+    initWeb3Pub({ commit }, data) {
+      /*const blockchainURL = "https://co3-pantheon.di.unito.it:7545";
       const web3pub = new Web3(
         new HDWalletProvider(this.state.miachiave, blockchainURL)
-      );
-      commit("saveWeb3pub", web3pub);
+      );*/
+      console.log("actions initweb3pub");
+      console.log(data, "WEB3");
+      commit("saveWeb3pub", data);
     },
 
     async mintTx({ context }, payload) {

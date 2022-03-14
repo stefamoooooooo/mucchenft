@@ -1,13 +1,10 @@
 <template>
   <v-container>
-    <vue-metamask
-      userMessage="msg"
-      @onComplete="onComplete" 
-    ></vue-metamask>
+    <vue-metamask userMessage="msg" @onComplete="onComplete"></vue-metamask>
     <h1>Compra NFT</h1>
     <br />
-  
-    <v-expansion-panels>
+
+    <v-expansion-panels v-if="this.mmSupport">
       <v-expansion-panel
         v-for="(breeder, index) in this.$store.state.datiAllevatori"
         :key="index"
@@ -51,8 +48,7 @@
 
 <script>
 import { mapActions } from "vuex";
-import VueMetamask from 'vue-metamask';
-
+import VueMetamask from "vue-metamask";
 
 export default {
   components: { VueMetamask },
@@ -60,21 +56,26 @@ export default {
   data: function () {
     return {
       cows: [],
-      msg: "This is demo net work"
+      msg: "This is demo net work",
+      mmSupport: false,
     };
   },
 
   mounted() {
-
-    this.getMucche();
+    if (typeof window.ethereum !== "undefined") {
+      console.log("MetaMask is installed!");
+      this.mmSupport = true;
+    }
   },
 
   methods: {
-    ...mapActions(["getMucche"]),
+    ...mapActions(["getMucche", "initWeb3Pub"]),
 
-    onComplete(data){
-        console.log('data:', data);
-        this.initWeb3Pub()
+    onComplete(data) {
+      console.log("data:", data);
+      this.initWeb3Pub(data.web3);
+
+      this.getMucche();
     },
 
     buy() {
