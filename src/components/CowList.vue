@@ -9,11 +9,11 @@
         v-for="(breeder, index) in this.$store.state.datiAllevatori"
         :key="index"
       >
-        <v-expansion-panel-header>
+        <v-expansion-panel-header color="#f5f5f5">
           {{ breeder.nome }}
         </v-expansion-panel-header>
 
-        <v-expansion-panel-content>
+        <v-expansion-panel-content color="#f5f5f5">
           <v-container>
             <v-card
               v-for="(mucca, ind) in $store.state.datiAllevatori[index].nft"
@@ -21,28 +21,41 @@
               width="500"
               hover
               class="ma-4"
+              color="#b3b3b3"
             >
               <v-img
-                src="https://gateway.pinata.cloud/ipfs/QmTuhgzis4Ge8ZymQDkYhSvK5CwyeYSw851vUc5xn7QEPo"
+                v-bind:src="`https://gateway.pinata.cloud/ipfs/${mucca.image}`"
               />
-              <v-card-title>
-                {{ mucca["marca auricolare"] }} <br />
+              <v-card-title v-if="mucca.nome">
+                {{ mucca["nome"] }}
               </v-card-title>
-
-              <v-card-text>
-                colore: {{ mucca["colore"] }} <br />
-                eta': {{ mucca["eta"] }} <br />
-                razza: {{ mucca["razza"] }}
-              </v-card-text>
-
+              <v-card-title v-else>
+                {{ mucca["marca auricolare"] }}
+              </v-card-title>
               <v-card-actions>
-                <v-btn
-                  v-on:click="buy(mucca)"
-                  :disabled="mucca.price == 0"
-                  :loading="loadingBuy"
-                >
-                  Compra per {{ mucca.price }} ETH!
-                </v-btn>
+                <v-row>
+                  <v-col>
+                    <v-card-text>
+                      <p v-if="mucca.nome">{{ mucca["marca auricolare"] }}</p>
+                      <p>colore: {{ mucca["colore"] }}</p>
+
+                      <p>eta': {{ mucca["eta"] }}</p>
+                      <p>razza: {{ mucca["razza"] }}</p>
+                    </v-card-text>
+                  </v-col>
+
+                  <v-col>
+                    <br />
+                    <br />
+                    <v-btn
+                      v-on:click="buy(mucca)"
+                      :disabled="mucca.price == 0"
+                      :loading="loadingBuy"
+                    >
+                      Compra per {{ mucca.price }} ETH!
+                    </v-btn>
+                  </v-col>
+                </v-row>
               </v-card-actions>
             </v-card>
           </v-container>
@@ -55,10 +68,10 @@
 
     <v-expansion-panels v-if="this.$store.state.user.NFTs.length !== 0">
       <v-expansion-panel>
-        <v-expansion-panel-header>
+        <v-expansion-panel-header color="#f5f5f5">
           Tuoi NFT ({{ this.$store.state.user.address }})
         </v-expansion-panel-header>
-        <v-expansion-panel-content>
+        <v-expansion-panel-content color="#f5f5f5">
           <v-container>
             <v-card
               v-for="(mucca, ind) in $store.state.user.NFTs"
@@ -66,31 +79,41 @@
               width="500"
               hover
               class="ma-4"
+              color="#b3b3b3"
             >
               <v-img
-                src="https://gateway.pinata.cloud/ipfs/QmTuhgzis4Ge8ZymQDkYhSvK5CwyeYSw851vUc5xn7QEPo"
+                v-bind:src="`https://gateway.pinata.cloud/ipfs/${mucca.image}`"
               />
-              <v-card-title>
-                {{ mucca["marca auricolare"] }} <br />
+              <v-card-title v-if="mucca.nome">
+                {{ mucca["nome"] }}
+              </v-card-title>
+              <v-card-title v-else>
+                {{ mucca["marca auricolare"] }}
               </v-card-title>
 
-              <v-card-text>
-                colore: {{ mucca["colore"] }} <br />
-                eta': {{ mucca["eta"] }} <br />
-                razza: {{ mucca["razza"] }}
-              </v-card-text>
-              <v-row>
-                <v-col
-                  ><v-btn v-on:click="generateQRCode(mucca)"
-                    >Genera QRCode</v-btn
-                  ></v-col
-                >
-                <v-col>
-                  <span v-if="showQR & (mucca.id == cow.id)">
-                    <qrcode-vue :value="value"></qrcode-vue>
-                  </span>
-                </v-col>
-              </v-row>
+              <v-card-actions>
+                <v-row>
+                  <v-col>
+                    <v-card-text>
+                      <p v-if="mucca.nome">{{ mucca["marca auricolare"] }}</p>
+                      <p>colore: {{ mucca["colore"] }}</p>
+
+                      <p>eta': {{ mucca["eta"] }}</p>
+                      <p>razza: {{ mucca["razza"] }}</p>
+                    </v-card-text>
+                  </v-col>
+                  <v-col>
+                    <v-btn v-on:click="generateQRCode(mucca)" small
+                      >Genera QRCode</v-btn
+                    >
+                    <br />
+                    <br />
+                    <span v-if="showQR & (mucca.id == cow.id)">
+                      <qrcode-vue :value="value"></qrcode-vue>
+                    </span>
+                  </v-col>
+                </v-row>
+              </v-card-actions>
             </v-card>
           </v-container>
         </v-expansion-panel-content>
@@ -115,6 +138,7 @@ export default {
       loadingBuy: false,
       value: "",
       showQR: false,
+      name: "",
     };
   },
 
@@ -152,7 +176,13 @@ export default {
         owner: mucca.owner,
         price: mucca.price,
       };
-      await this.buyNFT(payload);
+      try {
+        await this.buyNFT(payload);
+      } catch (error) {
+        console.log(error);
+        console.log("non puoi comprare un NFT gia' in tuo possesso");
+      }
+
       this.loadingBuy = false;
     },
 

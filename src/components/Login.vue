@@ -48,7 +48,7 @@
       "
     >
       <!-- CARD INFO UTENTE LOGGATO -->
-      <v-card>
+      <v-card color="#f5f5f5">
         <v-card-title>
           <v-col>
             Utente loggato <br />
@@ -61,7 +61,7 @@
       <br /><br /><br />
 
       <!-- CARD MINTING NFT -->
-      <v-card>
+      <v-card color="#f5f5f5">
         <v-card-title
           ><v-col
             >Inserisci i parametri della mucca da mintare:</v-col
@@ -80,8 +80,14 @@
               <v-text-field
                 type="text"
                 class="mx-2"
+                v-model="cow.nome"
+                placeholder="nome"
+              />
+              <v-combobox
+                :items="colors"
+                class="mx-2"
                 v-model="cow.color"
-                placeholder="colore mucca"
+                placeholder="colore"
               />
               <v-text-field
                 type="number"
@@ -116,12 +122,13 @@
 
       <br /><br /><br />
 
-      <v-card>
+      <v-card color="#f5f5f5">
         <v-card-title> <v-col>Imposta i prezzi</v-col> </v-card-title>
         <v-card-actions>
           <v-container>
             <v-col>
               <v-card
+                color="#b3b3b3"
                 v-for="(cow, index) in this.$store.state.user.NFTs"
                 :key="index"
                 width="500"
@@ -129,38 +136,42 @@
                 class="ma-4"
               >
                 <v-img
-                  src="https://gateway.pinata.cloud/ipfs/QmTuhgzis4Ge8ZymQDkYhSvK5CwyeYSw851vUc5xn7QEPo"
+                  v-bind:src="`https://gateway.pinata.cloud/ipfs/${cow.image}`"
                 />
-                <v-card-title>
-                  <v-col> {{ cow["marca auricolare"] }} <br /> </v-col>
+                <v-card-title v-if="cow.nome">
+                  {{ cow["nome"] }}
                 </v-card-title>
-
+                <v-card-title v-else>
+                  {{ cow["marca auricolare"] }}
+                </v-card-title>
                 <v-card-actions>
                   <v-card-text>
-                    colore: {{ cow["colore"] }} <br />
-                    eta': {{ cow["eta"] }} <br />
-                    razza: {{ cow["razza"] }} <br />
-                    prezzo:
-                    <span v-if="cow.price == 0">
-                      <v-text-field
-                        type="number"
-                        class="mx-2"
-                        v-model="priceToSet"
-                        placeholder="Inserisci un prezzo in ETH"
-                      />
-                      <v-btn
-                        v-on:click="setPrice(priceToSet, cow.id)"
-                        :loading="loadingSetPrice"
-                      >
-                        ok
-                      </v-btn>
-                    </span>
-                    <span v-else>
-                      {{ cow.price }}
-                      <v-btn x-small v-on:click="modificaPrezzo(cow)">
-                        Modifica
-                      </v-btn>
-                    </span>
+                    <p>colore: {{ cow["colore"] }}</p>
+                    <p>eta': {{ cow["eta"] }}</p>
+                    <p>razza: {{ cow["razza"] }}</p>
+                    <p>
+                      prezzo:
+                      <span v-if="cow.price == 0">
+                        <v-text-field
+                          type="number"
+                          class="mx-2"
+                          v-model="priceToSet"
+                          placeholder="Inserisci un prezzo in ETH"
+                        />
+                        <v-btn
+                          v-on:click="setPrice(priceToSet, cow.id)"
+                          :loading="loadingSetPrice"
+                        >
+                          ok
+                        </v-btn>
+                      </span>
+                      <span v-else>
+                        {{ cow.price }} ETH
+                        <v-btn x-small v-on:click="modificaPrezzo(cow)">
+                          Modifica
+                        </v-btn>
+                      </span>
+                    </p>
                   </v-card-text>
                 </v-card-actions>
               </v-card>
@@ -194,8 +205,8 @@ import { mapActions } from "vuex";
 
 const pinataSDK = require("@pinata/sdk");
 const pinata = pinataSDK(
-  "076cca4f7dda4eed3a76",
-  "72df3249903924129b0b0890b1a177b8ebd3d2e0e66579820d8baa6285d5d6c2"
+  "3ec5f37ccb7e55ef9b0f",
+  "9d5f0260bc37ea5eee09dea4f1abbd7080cf16395e02d1ab3fbf848e42867a98"
 );
 
 export default {
@@ -209,7 +220,9 @@ export default {
         age: "",
         razza: "",
         price: 0,
+        nome: "",
       },
+      colors: ["marrone", "nero", "bianco-marrone", "bianco-nero"],
       priceToSet: "",
       loadingMint: false,
       loadingSetPrice: false,
@@ -217,12 +230,12 @@ export default {
   },
 
   mounted() {
-    console.log("sono in mounted");
+    //console.log("sono in mounted");
     if (
       this.$store.state.user.logged &&
       this.$store.state.user.role == "allevatore"
     ) {
-      console.log("sono in mounted ed e loggato ed allevatore");
+      //console.log("sono in mounted ed e loggato ed allevatore");
       this.getMuccheOf(this.$store.state.user.CF);
       this.getNFTOf(this.$store.state.user.address);
     }
@@ -238,6 +251,10 @@ export default {
       "getNFTOf",
       "setPriceNFT",
     ]),
+
+    getUrl(cow) {
+      return "https://gateway.pinata.cloud/ipfs/" + cow.image;
+    },
 
     modificaPrezzo(cow) {
       cow.price = 0;
@@ -297,10 +314,12 @@ export default {
     },
 
     async getPhontoHash() {
+      //console.log(this.cow, "MUCCA getphotohash");
       const metadataFilter = {
-        name: "Muccaa",
+        name: this.cow.color,
         keyvalues: {},
       };
+      console.log("METADATI -> ", metadataFilter);
 
       const filters = {
         status: "pinned",
@@ -309,12 +328,19 @@ export default {
         metadata: metadataFilter,
       };
       let res = await pinata.pinList(filters);
-      res = res.rows[0].ipfs_pin_hash;
-      return res;
+      let finalRes;
+      //console.log("pinata res: ", res);
+      res.rows.forEach((element) => {
+        if (element.metadata.name == this.cow.color + ".png")
+          finalRes = element.ipfs_pin_hash;
+      });
+      //res = res.rows[0].ipfs_pin_hash;
+      return finalRes;
     },
 
     async uploadMetadata() {
       const marca = this.cow.id;
+      const nome = this.cow.nome;
       const colore = this.cow.color;
       const eta = this.cow.age;
       const razza = this.cow.razza;
@@ -322,6 +348,7 @@ export default {
 
       const body = {
         "marca auricolare": marca,
+        nome: nome,
         image: image,
         colore: colore,
         eta: eta,

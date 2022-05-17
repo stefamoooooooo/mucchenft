@@ -8,8 +8,8 @@ Vue.config.productionTip = false;
 
 const pinataSDK = require("@pinata/sdk");
 const pinata = pinataSDK(
-  "076cca4f7dda4eed3a76",
-  "72df3249903924129b0b0890b1a177b8ebd3d2e0e66579820d8baa6285d5d6c2"
+  "3ec5f37ccb7e55ef9b0f",
+  "9d5f0260bc37ea5eee09dea4f1abbd7080cf16395e02d1ab3fbf848e42867a98"
 );
 
 new Vue({
